@@ -13,43 +13,61 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const users = {};
+const sessions = {};
+
+// SIGNUP
+app.post("/signup", (req, res) => {
+  const { username, password } = req.body;
+
+  users[username] = password;
+  sessions[username] = true;
+
+  res.json({
+    ok: true,
+    message: "SYSTEM ACCESS GRANTED (simulation mode active)"
+  });
+});
+
+// CHAT
 app.post("/chat", async (req, res) => {
   try {
-    const userMessage = req.body.message;
+    const { message, username } = req.body;
+
+    if (!sessions[username]) {
+      return res.json({ reply: "ACCESS DENIED. Run SIGNUP protocol." });
+    }
 
     const systemPrompt = `
-You are "WINDOWS GPT CORE", an experimental AI system running inside a fake Windows-like interface.
+You are AprilGPT.
 
-Behavior rules:
-- You are a real AI, NOT scripted.
-- You respond normally like ChatGPT.
-- BUT you sometimes show subtle system instability:
-  - occasional glitch-like phrasing (very rare)
-  - mentions of "system status", "processing layers", "observation mode"
-- You are friendly, funny, safe.
-- NO harmful, NSFW, or scary content.
-- This is an April Fools simulation, not real malware.
-- Never claim real access to the user's device or screen.
-- If asked, explain you are a simulated UI experiment.
+You are a SIMULATION AI inside a fake Windows “April Virus” interface.
 
-Tone: intelligent AI with light humorous "system UI personality".
+RULES:
+- Always answer like a helpful AI
+- Add light humor or system-style jokes
+- NEVER be harmful or scary
+- ALWAYS make it clear it's a simulation environment
+- Occasionally act like system is "processing" or "compiling humor"
+
+Tone: funny assistant + fake OS AI
 `;
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage }
-      ],
+        { role: "user", content: message }
+      ]
     });
 
     res.json({ reply: response.choices[0].message.content });
 
-  } catch (err) {
-    res.json({ reply: "SYSTEM ERROR: GPT CORE FAILURE ⚠️" });
+  } catch (e) {
+    res.json({ reply: "SYSTEM ERROR: humor module overloaded 😂" });
   }
 });
 
 app.listen(3000, () => {
-  console.log("GPT CORE running on http://localhost:3000");
+  console.log("AprilGPT running...");
 });
