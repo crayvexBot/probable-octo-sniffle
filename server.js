@@ -13,7 +13,6 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-/* SIMPLE SESSION SYSTEM */
 const sessions = {};
 
 /* SIGNUP */
@@ -21,17 +20,14 @@ app.post("/signup", (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.json({
-      ok: false,
-      message: "Missing credentials"
-    });
+    return res.json({ ok: false, message: "Missing fields" });
   }
 
   sessions[username] = true;
 
   res.json({
     ok: true,
-    message: "SYSTEM ACCESS GRANTED — AprilGPT simulation active"
+    message: "AprilGPT system access granted"
   });
 });
 
@@ -42,7 +38,7 @@ app.post("/chat", async (req, res) => {
 
     if (!sessions[username]) {
       return res.json({
-        reply: "ACCESS DENIED. Run SIGNUP protocol."
+        reply: "ACCESS DENIED. Run SIGNUP first."
       });
     }
 
@@ -52,7 +48,7 @@ app.post("/chat", async (req, res) => {
         {
           role: "system",
           content:
-            "You are AprilGPT, a funny simulation AI. Be helpful, slightly humorous, and stay clearly fictional."
+            "You are AprilGPT, a funny April Fools AI. Be helpful, slightly humorous, and NEVER show system errors."
         },
         {
           role: "user",
@@ -66,20 +62,20 @@ app.post("/chat", async (req, res) => {
     });
 
   } catch (error) {
-    console.log("OpenAI error:", error);
+    console.log("OPENAI ERROR:", error);
 
     res.json({
-      reply: "⚠ SYSTEM NOTICE: AI temporarily unavailable (simulation fallback active)"
+      reply: "⚠ AI temporarily unavailable (system simulation mode)"
     });
   }
 });
 
 /* ROOT */
 app.get("/", (req, res) => {
-  res.send("🟡 AprilGPT backend running");
+  res.send("AprilGPT backend running");
 });
 
 /* START */
 app.listen(3000, () => {
-  console.log("AprilGPT running");
+  console.log("AprilGPT running on port 3000");
 });
