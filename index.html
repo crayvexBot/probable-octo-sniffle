@@ -123,20 +123,21 @@ let username = "";
 // BOOT SOUND
 document.getElementById("bootSound").play();
 
+// BOOT SEQUENCE
 setTimeout(() => {
   document.getElementById("boot").style.display = "none";
   document.getElementById("signup").style.display = "block";
 }, 2500);
 
-// SIGNUP
+// SIGNUP FUNCTION
 async function signup() {
   username = document.getElementById("user").value;
 
-  const res = await fetch("https://YOUR-RENDER-URL/signup", {
+  const res = await fetch("https://aprilgpt.onrender.com/signup", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username,
+      username: username,
       password: document.getElementById("pass").value
     })
   });
@@ -161,16 +162,19 @@ function type(text) {
   }, 10);
 }
 
-// SEND MESSAGE
+// SEND FUNCTION (FIXED)
 async function send() {
   const msg = document.getElementById("msg").value;
 
   document.getElementById("sendSound").play();
 
-  const res = await fetch("https://YOUR-RENDER-URL/chat", {
+  const res = await fetch("https://aprilgpt.onrender.com/chat", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ message: msg, username })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: msg,
+      username: username
+    })
   });
 
   const data = await res.json();
