@@ -1,0 +1,106 @@
+body {
+  margin: 0;
+  background: #050505;
+  color: #00ff88;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+/* TOP BAR */
+#topbar {
+  padding: 10px;
+  border-bottom: 1px solid #00ff88;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0.9;
+}
+
+/* BOOT SCREEN */
+#boot {
+  padding: 20px;
+  text-shadow: 0 0 8px #00ff88;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* MAIN CHAT AREA */
+#chat {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+}
+
+/* OUTPUT (chat log) */
+#output {
+  padding: 15px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  scrollbar-width: thin;
+  scrollbar-color: #00ff88 #111;
+}
+
+/* INPUT BAR */
+#inputBar {
+  display: flex;
+  border-top: 1px solid #00ff88;
+  padding: 10px;
+  gap: 10px;
+  background: #000;
+}
+
+/* INPUT */
+#msg {
+  flex: 1;
+  padding: 12px;
+  background: black;
+  border: 1px solid #00ff88;
+  color: #00ff88;
+  outline: none;
+  font-size: 14px;
+}
+
+/* BUTTON */
+button {
+  padding: 12px 18px;
+  background: black;
+  border: 1px solid #00ff88;
+  color: #00ff88;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #00ff8820;
+}
+
+/* TERMINAL TEXT STYLE */
+#output div {
+  margin-bottom: 6px;
+}
+
+/* USER LINE STYLE */
+#output div:contains("cmd>User") {
+  color: #ffffff;
+}
+
+/* AI LINE STYLE */
+#output div:contains("pythonAI") {
+  color: #00ff88;
+  text-shadow: 0 0 3px #00ff88;
+}
+
+/* SCROLLBAR (Chrome) */
+#output::-webkit-scrollbar {
+  width: 6px;
+}
+
+#output::-webkit-scrollbar-thumb {
+  background: #00ff88;
+}
+
+#output::-webkit-scrollbar-track {
+  background: #111;
+}
