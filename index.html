@@ -19,45 +19,33 @@ body {
   background: rgba(255,255,0,0.15);
   border: 1px solid yellow;
   color: yellow;
-  padding: 8px 12px;
+  padding: 8px;
   font-size: 12px;
-  z-index: 9999;
 }
 
-.screen {
-  display: none;
-  padding: 30px;
-}
-
+.screen { display: none; padding: 20px; }
 #boot { display: block; }
 
 input {
   background: black;
   border: 1px solid #00ff88;
   color: #00ff88;
-  padding: 12px;
+  padding: 10px;
   width: 250px;
 }
 
 button {
   background: #00ff88;
   border: none;
-  padding: 12px;
+  padding: 10px;
   cursor: pointer;
 }
 
-#chatBox {
-  display: flex;
-  flex-direction: column;
-  height: 80vh;
-}
-
 #messages {
-  flex: 1;
+  height: 70vh;
   overflow-y: auto;
   border: 1px solid #00ff88;
-  padding: 15px;
-  font-size: 15px;
+  padding: 10px;
 }
 
 #inputArea {
@@ -65,48 +53,37 @@ button {
   gap: 10px;
   margin-top: 10px;
 }
-
-#msg {
-  flex: 1;
-  font-size: 16px;
-}
 </style>
 </head>
 
 <body>
 
-<div id="badge">🟡 APRIL FOOLS GPT — SIMULATION MODE</div>
+<div id="badge">🟡 APRIL FOOLS GPT</div>
 
 <!-- BOOT -->
 <div id="boot" class="screen">
-  <h2>Loading April Virus...</h2>
-  <p style="color:orange;">This is NOT a virus. Simulation only.</p>
+  <h2>Loading April System...</h2>
 </div>
 
 <!-- SIGNUP -->
 <div id="signup" class="screen">
-  <h2>System Sign Up</h2>
+  <h2>Sign Up</h2>
   <input id="user" placeholder="username"><br><br>
   <input id="pass" type="password" placeholder="password"><br><br>
-  <button onclick="signup()">Enter System</button>
+  <button onclick="signup()">Enter</button>
 </div>
 
 <!-- CHAT -->
 <div id="chat" class="screen">
   <h2>AprilGPT Terminal</h2>
 
-  <div id="chatBox">
-    <div id="messages"></div>
+  <div id="messages"></div>
 
-    <div id="inputArea">
-      <input id="msg" placeholder="Type message..." />
-      <button onclick="send()">Send</button>
-    </div>
+  <div id="inputArea">
+    <input id="msg" placeholder="Type..." />
+    <button onclick="send()">Send</button>
   </div>
 </div>
-
-<!-- SOUNDS -->
-<audio id="sendSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
 
 <script>
 let username = "";
@@ -115,21 +92,19 @@ let username = "";
 setTimeout(() => {
   document.getElementById("boot").style.display = "none";
   document.getElementById("signup").style.display = "block";
-}, 2500);
+}, 2000);
 
 /* SIGNUP */
 async function signup() {
-  const u = document.getElementById("user").value.trim();
-  const p = document.getElementById("pass").value.trim();
-
-  if (!u || !p) return alert("Fill fields");
-
-  username = u;
+  username = document.getElementById("user").value;
 
   const res = await fetch("https://aprilgpt.onrender.com/signup", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ username: u, password: p })
+    body: JSON.stringify({
+      username,
+      password: document.getElementById("pass").value
+    })
   });
 
   const data = await res.json();
@@ -139,8 +114,8 @@ async function signup() {
   document.getElementById("chat").style.display = "block";
 }
 
-/* CHAT RENDER */
-function addMessage(text, who) {
+/* CHAT UI */
+function add(text, who) {
   const div = document.createElement("div");
   div.innerText = who + ": " + text;
   document.getElementById("messages").appendChild(div);
@@ -150,25 +125,27 @@ function addMessage(text, who) {
 async function send() {
   const input = document.getElementById("msg");
   const msg = input.value.trim();
-
   if (!msg) return;
 
-  addMessage(msg, "You");
+  add(msg, "You");
   input.value = "";
 
-  document.getElementById("sendSound").play();
+  try {
+    const res = await fetch("https://aprilgpt.onrender.com/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        message: msg,
+        username: username
+      })
+    });
 
-  const res = await fetch("https://aprilgpt.onrender.com/chat", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      message: msg,
-      username: username
-    })
-  });
+    const data = await res.json();
+    add(data.reply, "AprilGPT");
 
-  const data = await res.json();
-  addMessage(data.reply, "AprilGPT");
+  } catch (e) {
+    add("SYSTEM ERROR: connection lost", "AprilGPT");
+  }
 }
 </script>
 
