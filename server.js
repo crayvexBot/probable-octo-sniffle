@@ -25,30 +25,26 @@ app.post("/signup", (req, res) => {
 
   sessions[username] = true;
 
+  
   res.json({
     ok: true,
     message: "AprilGPT system access granted"
   });
 });
 
-/* CHAT */
 app.post("/chat", async (req, res) => {
   try {
     const { message, username } = req.body;
 
-    if (!sessions[username]) {
-      return res.json({
-        reply: "ACCESS DENIED. Run SIGNUP first."
-      });
-    }
+    console.log("USER:", username);
+    console.log("MESSAGE:", message);
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content:
-            "You are AprilGPT, a funny April Fools AI. Be helpful, slightly humorous, and NEVER show system errors."
+          content: "Reply only with: OK WORKING"
         },
         {
           role: "user",
@@ -57,15 +53,17 @@ app.post("/chat", async (req, res) => {
       ]
     });
 
+    console.log("OPENAI SUCCESS");
+
     res.json({
       reply: response.choices[0].message.content
     });
 
   } catch (error) {
-    console.log("OPENAI ERROR:", error);
+    console.log("🔥 OPENAI ERROR FULL:", error);
 
     res.json({
-      reply: "⚠ AI temporarily unavailable (system simulation mode)"
+      reply: "❌ OPENAI FAILED — check Render logs"
     });
   }
 });
