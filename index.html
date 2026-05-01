@@ -2,150 +2,77 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AprilGPT</title>
+<title>console: Live</title>
 
 <style>
 body {
-  margin: 0;
   background: black;
   color: #00ff88;
   font-family: monospace;
 }
 
-#badge {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background: rgba(255,255,0,0.15);
-  border: 1px solid yellow;
-  color: yellow;
-  padding: 8px;
-  font-size: 12px;
+#box {
+  padding: 20px;
 }
 
-.screen { display: none; padding: 20px; }
-#boot { display: block; }
-
 input {
-  background: black;
-  border: 1px solid #00ff88;
-  color: #00ff88;
+  width: 80%;
   padding: 10px;
-  width: 250px;
+  background: #111;
+  color: #00ff88;
+  border: 1px solid #00ff88;
 }
 
 button {
+  padding: 10px;
   background: #00ff88;
   border: none;
-  padding: 10px;
   cursor: pointer;
-}
-
-#messages {
-  height: 70vh;
-  overflow-y: auto;
-  border: 1px solid #00ff88;
-  padding: 10px;
-}
-
-#inputArea {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="badge">🟡 APRIL FOOLS GPT</div>
+<div id="box">
+  <h2>AprilGPT (HF)</h2>
 
-<!-- BOOT -->
-<div id="boot" class="screen">
-  <h2>Loading April System...</h2>
-</div>
+  <div id="chat"></div>
 
-<!-- SIGNUP -->
-<div id="signup" class="screen">
-  <h2>Sign Up</h2>
-  <input id="user" placeholder="username"><br><br>
-  <input id="pass" type="password" placeholder="password"><br><br>
-  <button onclick="signup()">Enter</button>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="screen">
-  <h2>AprilGPT Terminal</h2>
-
-  <div id="messages"></div>
-
-  <div id="inputArea">
-    <input id="msg" placeholder="Type..." />
-    <button onclick="send()">Send</button>
-  </div>
+  <input id="input" placeholder="Ask something..." />
+  <button onclick="send()">Send</button>
 </div>
 
 <script>
-let username = "";
+const API = "https://YOUR-RENDER-URL.onrender.com/chat";
 
-/* BOOT */
-setTimeout(() => {
-  document.getElementById("boot").style.display = "none";
-  document.getElementById("signup").style.display = "block";
-}, 2000);
-
-/* SIGNUP */
-async function signup() {
-  username = document.getElementById("user").value;
-
-  const res = await fetch("https://aprilgpt.onrender.com/signup", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      username,
-      password: document.getElementById("pass").value
-    })
-  });
-
-  const data = await res.json();
-  alert(data.message);
-
-  document.getElementById("signup").style.display = "none";
-  document.getElementById("chat").style.display = "block";
-}
-
-/* CHAT UI */
-function add(text, who) {
-  const div = document.createElement("div");
-  div.innerText = who + ": " + text;
-  document.getElementById("messages").appendChild(div);
-}
-
-/* SEND */
 async function send() {
-  const input = document.getElementById("msg");
-  const msg = input.value.trim();
+  const input = document.getElementById("input");
+  const msg = input.value;
   if (!msg) return;
 
-  add(msg, "You");
+  add("You: " + msg);
   input.value = "";
 
   try {
-    const res = await fetch("https://aprilgpt.onrender.com/chat", {
+    const res = await fetch(API, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        message: msg,
-        username: username
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg })
     });
 
     const data = await res.json();
-    add(data.reply, "AprilGPT");
+    add("AprilGPT: " + data.reply);
 
   } catch (e) {
-    add("SYSTEM ERROR: connection lost", "AprilGPT");
+    add("AprilGPT: ❌ server error");
   }
+}
+
+function add(text) {
+  const div = document.createElement("div");
+  div.innerText = text;
+  document.getElementById("chat").appendChild(div);
 }
 </script>
 
