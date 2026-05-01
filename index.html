@@ -12,7 +12,6 @@ body {
   font-family: monospace;
 }
 
-/* TOP BADGE */
 #badge {
   position: fixed;
   top: 10px;
@@ -25,7 +24,6 @@ body {
   z-index: 9999;
 }
 
-/* SCREENS */
 .screen {
   display: none;
   padding: 30px;
@@ -33,7 +31,6 @@ body {
 
 #boot { display: block; }
 
-/* INPUTS */
 input {
   background: black;
   border: 1px solid #00ff88;
@@ -42,7 +39,6 @@ input {
   width: 250px;
 }
 
-/* BUTTONS */
 button {
   background: #00ff88;
   border: none;
@@ -50,7 +46,6 @@ button {
   cursor: pointer;
 }
 
-/* CHAT BIG UI */
 #chatBox {
   display: flex;
   flex-direction: column;
@@ -120,36 +115,45 @@ button {
 <script>
 let username = "";
 
-// BOOT SOUND
+/* BOOT */
 document.getElementById("bootSound").play();
 
-// BOOT SEQUENCE
 setTimeout(() => {
   document.getElementById("boot").style.display = "none";
   document.getElementById("signup").style.display = "block";
 }, 2500);
 
-// SIGNUP FUNCTION
+/* SIGNUP */
 async function signup() {
-  username = document.getElementById("user").value;
+  const u = document.getElementById("user").value.trim();
+  const p = document.getElementById("pass").value.trim();
 
-  const res = await fetch("https://aprilgpt.onrender.com/signup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: username,
-      password: document.getElementById("pass").value
-    })
-  });
+  if (!u || !p) {
+    alert("Enter username + password");
+    return;
+  }
 
-  const data = await res.json();
-  alert(data.message);
+  username = u;
 
-  document.getElementById("signup").style.display = "none";
-  document.getElementById("chat").style.display = "block";
+  try {
+    const res = await fetch("https://aprilgpt.onrender.com/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: u, password: p })
+    });
+
+    const data = await res.json();
+    alert(data.message || "System Access Granted");
+
+    document.getElementById("signup").style.display = "none";
+    document.getElementById("chat").style.display = "block";
+  } catch (e) {
+    document.getElementById("errorSound").play();
+    alert("SYSTEM ERROR: cannot reach server");
+  }
 }
 
-// TYPE EFFECT
+/* TYPE EFFECT */
 function type(text) {
   let i = 0;
   const div = document.createElement("div");
@@ -162,23 +166,37 @@ function type(text) {
   }, 10);
 }
 
-// SEND FUNCTION (FIXED)
+/* SEND */
 async function send() {
-  const msg = document.getElementById("msg").value;
+  const msg = document.getElementById("msg").value.trim();
+
+  if (!msg) return;
 
   document.getElementById("sendSound").play();
 
-  const res = await fetch("https://aprilgpt.onrender.com/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: msg,
-      username: username
-    })
-  });
+  try {
+    const res = await fetch("https://aprilgpt.onrender.com/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: msg,
+        username: username
+      })
+    });
 
-  const data = await res.json();
-  type(data.reply);
+    const data = await res.json();
+
+    if (!data.reply) {
+      type("SYSTEM ERROR: empty AI response 🤖");
+      return;
+    }
+
+    type(data.reply);
+
+  } catch (e) {
+    document.getElementById("errorSound").play();
+    type("SYSTEM ERROR: connection lost ⚠");
+  }
 }
 </script>
 
