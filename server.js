@@ -1,50 +1,60 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import { HfInference } from "@huggingface/inference";
+const API = "https://aprilgpt-vi60.onrender.com/chat";
 
-dotenv.config();
+// boot animation
+setTimeout(() => {
+  document.getElementById("boot").style.display = "none";
+  document.getElementById("chat").style.display = "block";
+}, 1500);
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+// TYPE ANIMATION (safe + smooth)
+function typeText(text) {
+  const out = document.getElementById("output");
 
-const hf = new HfInference(process.env.HF_API_KEY);
+  const line = document.createElement("div");
+  out.appendChild(line);
 
-/* CHAT */
-app.post("/chat", async (req, res) => {
+  // safety fallback
+  if (!text || text.trim().length < 2) {
+    text = "…my joke engine crashed into a wall of silence.";
+  }
+
+  let i = 0;
+
+  const interval = setInterval(() => {
+    line.innerText = "pythonAI> " + text.slice(0, i);
+    i++;
+
+    if (i > text.length) clearInterval(interval);
+
+    out.scrollTop = 999999;
+  }, 12);
+}
+
+// SEND MESSAGE
+async function send() {
+  const input = document.getElementById("msg");
+  const msg = input.value;
+
+  // ❌ ignore empty input
+  if (!msg || msg.trim().length < 1) return;
+
+  input.value = "";
+
+  const out = document.getElementById("output");
+  out.innerHTML += `cmd>User: ${msg}\n`;
+
   try {
-    const { message } = req.body;
-
-    const response = await hf.textGeneration({
-      model: "mistralai/Mistral-7B-Instruct-v0.2",
-      inputs: message,
-      parameters: {
-        max_new_tokens: 120,
-        temperature: 0.7
-      }
+    const r = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg })
     });
 
-    res.json({
-      reply: response.generated_text
-    });
+    const d = await r.json();
+
+    typeText(d.reply);
 
   } catch (err) {
-    console.log("HF ERROR:", err);
-
-    res.json({
-      reply: "❌ HuggingFace failed (check API key or model access)"
-    });
+    typeText("AI ERROR: CONNECTION LOST TO APRIL GPT SERVER");
   }
-});
-
-/* ROOT */
-app.get("/", (req, res) => {
-  res.send("AprilGPT HF backend running");
-});
-
-/* PORT */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("HF AprilGPT running on", PORT);
-});
+}
