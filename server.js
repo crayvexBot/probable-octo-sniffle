@@ -9,13 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* OPENAI */
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-/* SIMPLE MEMORY */
-const users = {};
+/* SIMPLE SESSION SYSTEM */
 const sessions = {};
 
 /* SIGNUP */
@@ -29,12 +27,11 @@ app.post("/signup", (req, res) => {
     });
   }
 
-  users[username] = password;
   sessions[username] = true;
 
   res.json({
     ok: true,
-    message: "SYSTEM ACCESS GRANTED (AprilGPT simulation active)"
+    message: "SYSTEM ACCESS GRANTED — AprilGPT simulation active"
   });
 });
 
@@ -43,31 +40,19 @@ app.post("/chat", async (req, res) => {
   try {
     const { message, username } = req.body;
 
-    /* CHECK LOGIN */
     if (!sessions[username]) {
       return res.json({
         reply: "ACCESS DENIED. Run SIGNUP protocol."
       });
     }
 
-    /* OPENAI CALL */
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: `
-You are AprilGPT.
-
-You are a simulation AI inside a fake Windows-style April Fools system.
-
-Rules:
-- Be helpful
-- Be slightly funny
-- Add occasional system-style phrases like "processing..."
-- NEVER be scary or harmful
-- Always stay clearly fictional
-`
+          content:
+            "You are AprilGPT, a funny simulation AI. Be helpful, slightly humorous, and stay clearly fictional."
         },
         {
           role: "user",
@@ -81,21 +66,20 @@ Rules:
     });
 
   } catch (error) {
-    console.log("OpenAI Error:", error);
+    console.log("OpenAI error:", error);
 
-    /* SAFE FALLBACK */
     res.json({
-      reply: "SYSTEM NOTICE: AI core unstable ⚠ switching to fallback simulation mode..."
+      reply: "⚠ SYSTEM NOTICE: AI temporarily unavailable (simulation fallback active)"
     });
   }
 });
 
 /* ROOT */
 app.get("/", (req, res) => {
-  res.send("🟡 AprilGPT backend running (simulation active)");
+  res.send("🟡 AprilGPT backend running");
 });
 
-/* START SERVER */
+/* START */
 app.listen(3000, () => {
-  console.log("AprilGPT running on port 3000");
+  console.log("AprilGPT running");
 });
